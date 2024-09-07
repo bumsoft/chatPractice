@@ -7,15 +7,15 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageDto {
+public class ChatDTO {
 
     public enum MessageType{
         ENTER, TALK
     }
 
     private MessageType messageType;
-    private Long chatRoomId;
-    private Long senderId;
-    private String message;
+    private String chatRoomId;
+    private String senderId;
+    private String _content;
 
 }

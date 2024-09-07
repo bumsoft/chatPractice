@@ -20,6 +20,6 @@ public class WebSocketConfig implements WebSocketConfigurer {
         // endpoint : /chat
         // /chat으로 요청이 들어오면 websocket 통신 진행
         // setAllowedOrigins("*") : 모든 ip에서 접속 가능하도록.
-        registry.addHandler(webSocketHandler, "/chat").setAllowedOrigins("*");
+        registry.addHandler(webSocketHandler, "/ws/chat").setAllowedOrigins("*");
     }
 }

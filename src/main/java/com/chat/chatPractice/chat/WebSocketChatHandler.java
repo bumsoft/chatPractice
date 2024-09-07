@@ -26,8 +26,8 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     //현재 연결된 세션들
     private final Set<WebSocketSession> sessions = new HashSet<>();
 
-    // 채팅방 아이디가 Long으로 키값이고, set은 {session1, session2}
-    private final Map<Long,Set<WebSocketSession>> chatRoomSessionMap = new HashMap<>();
+    // 채팅방 아이디가 String 키값이고, set은 {session1, session2}
+    private final Map<String,Set<WebSocketSession>> chatRoomSessionMap = new HashMap<>();
 
 
     // 소켓 연결 확인
@@ -43,17 +43,19 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception
     {
         String payload = message.getPayload();
-        log.info("payload {}",payload);
 
 
         // 페이로드 -> chatMessageDto로 변환
-        ChatMessageDto chatMessageDto = mapper.readValue(payload, ChatMessageDto.class);
-        log.info("session {}", chatMessageDto.toString());
+        ChatDTO chatDTO = mapper.readValue(payload, ChatDTO.class);
+        chatDTO.setSenderId(session.getId());
+        log.info("payload {}",payload);
+        log.info("session {}", chatDTO.toString());
 
-        Long chatRoomId = chatMessageDto.getChatRoomId();
+        String chatRoomId = chatDTO.getChatRoomId();
         // 메모리 상에 채팅방에 대한 세션 없으면 만들어줌
         if(!chatRoomSessionMap.containsKey(chatRoomId)){
             chatRoomSessionMap.put(chatRoomId,new HashSet<>());
+            log.info("created_chatRoomId {}",chatRoomId);
         }
 
         // chatRoomSession : 채팅방에 포함된 세션들의 집합이다.
@@ -62,7 +64,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         // message 에 담긴 타입을 확인한다.
         // 이때 message 에서 getType 으로 가져온 내용이
         // ChatDTO 의 열거형인 MessageType 안에 있는 ENTER 과 동일한 값이라면
-        if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.ENTER)) {
+        if (chatDTO.getMessageType().equals(ChatDTO.MessageType.ENTER)) {
             // sessions 에 새로 들어온 session 을 담고,
             chatRoomSession.add(session);
         }
@@ -71,7 +73,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         if (chatRoomSession.size()>=3) {
             removeClosedSession(chatRoomSession);
         }
-        sendMessageToChatRoom(chatMessageDto, chatRoomSession);
+        sendMessageToChatRoom(chatDTO, chatRoomSession);
     }
 
     @Override
@@ -85,11 +87,14 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
         chatRoomSession.removeIf(sess -> !sessions.contains(sess));
     }
 
-    private void sendMessageToChatRoom(ChatMessageDto chatMessageDto, Set<WebSocketSession> chatRoomSession)
+    private void sendMessageToChatRoom(ChatDTO chatDTO, Set<WebSocketSession> chatRoomSession)
     {
-        chatRoomSession.parallelStream().forEach(sess -> sendMessage(sess, chatMessageDto));
+        chatRoomSession.parallelStream()
+                .filter(sess -> !sess.getId().equals(chatDTO.getSenderId()))  // 본인(senderId)에게는 전송하지 않음
+                .forEach(sess -> sendMessage(sess, chatDTO));
     }
 
+    //dto인 message를 다시 json인 string으로 변환하서 세션 클라이언트로 전송!!
     public <T> void sendMessage(WebSocketSession session, T message) {
         try{
             session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
