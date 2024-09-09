@@ -1,86 +1,6 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Chat Application</title>-->
-<!--    <style>-->
-<!--        #chat {-->
-<!--            width: 300px;-->
-<!--            height: 400px;-->
-<!--            border: 1px solid #000;-->
-<!--            overflow-y: scroll;-->
-<!--            margin-bottom: 10px;-->
-<!--        }-->
-<!--        #chat p {-->
-<!--            margin: 0;-->
-<!--        }-->
-<!--        #messageInput {-->
-<!--            width: 300px;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<h2>Chat Room</h2>-->
-<!--<div id="chat"></div>-->
-<!--<input type="text" id="messageInput" placeholder="Enter message">-->
-<!--<button onclick="sendMessage()">Send</button>-->
-
-<!--<script>-->
-<!--    // WebSocket 연결 설정-->
-<!--    const socket = new WebSocket('ws://localhost:8080/ws/chat'); // 서버 URL에 맞게 설정-->
-
-<!--    // 채팅 화면에 메시지를 추가하는 함수-->
-<!--    function appendMessage(message) {-->
-<!--        const chat = document.getElementById('chat');-->
-<!--        const messageElement = document.createElement('p');-->
-<!--        messageElement.textContent = message;-->
-<!--        chat.appendChild(messageElement);-->
-<!--        chat.scrollTop = chat.scrollHeight; // 스크롤을 맨 아래로-->
-<!--    }-->
-
-<!--    // WebSocket 연결이 열리면 발생-->
-<!--    socket.onopen = function(event) {-->
-<!--        console.log("Connected to WebSocket");-->
-<!--        const enterMessage = {-->
-<!--            messageType: "ENTER",-->
-<!--            chatRoomId: "room1", // 테스트용 방 ID-->
-<!--            _content: "님이 입장하셨습니다."-->
-<!--        };-->
-<!--        socket.send(JSON.stringify(enterMessage)); // 서버에 입장 메시지 전송-->
-<!--        appendMessage("채팅방에 입장했습니다.");-->
-<!--    };-->
-
-<!--    // 서버로부터 메시지를 받았을 때 처리 (입장 포함임)-->
-<!--    socket.onmessage = function(event) {-->
-
-<!--        const data = JSON.parse(event.data);-->
-
-<!--        const senderId = data.senderId.substring(0,5);-->
-<!--        const message = data._content;-->
-<!--        appendMessage("유저 "+senderId + ":" + message);-->
-<!--    };-->
-
-<!--    // 메시지를 입력하여 서버에 전송하는 함수-->
-<!--    function sendMessage() {-->
-<!--        const messageInput = document.getElementById('messageInput');-->
-<!--        const messageContent = messageInput.value;-->
-<!--        if (messageContent) {-->
-<!--            const chatMessage = {-->
-<!--                messageType: "TALK",-->
-<!--                chatRoomId: "room1", // 채팅방 ID-->
-<!--                _content: messageContent-->
-<!--            };-->
-<!--            socket.send(JSON.stringify(chatMessage)); // 서버로 메시지 전송-->
-<!--            appendMessage("YOU: " + messageContent);-->
-<!--            messageInput.value = ""; // 메시지 입력창 비우기-->
-<!--        }-->
-<!--    }-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -149,13 +69,15 @@
 </head>
 <body>
 <div id="chatContainer">
-    <h2 style="text-align:center; color:#0288d1;">Chat Room</h2>
+    <h2 id="roomNameElement" th:data-room-name="${room_name}">채팅방</h2>
     <div id="chat"></div>
     <input type="text" id="messageInput" placeholder="Enter message">
     <button id="sendButton" onclick="sendMessage()">Send</button>
 </div>
 
 <script>
+    const roomName = document.getElementById('roomNameElement').getAttribute('data-room-name');
+    console.log("roomName: ", roomName); // roomName 값 확인
     const socket = new WebSocket('ws://localhost:8080/ws/chat');
 
     function appendMessage(message, isUser = false) {
@@ -171,7 +93,7 @@
         console.log("Connected to WebSocket");
         const enterMessage = {
             messageType: "ENTER",
-            chatRoomId: "room1",
+            chatRoomId: roomName,
             _content: "님이 입장하셨습니다."
         };
         socket.send(JSON.stringify(enterMessage));
@@ -180,9 +102,9 @@
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        const senderId = data.senderId.substring(0,5);
+        const senderId = data.senderId;
         const message = data._content;
-        appendMessage("유저 "+senderId + ":" + message);
+        appendMessage(senderId + ":" + message);
     };
 
     function sendMessage() {
@@ -191,11 +113,10 @@
         if (messageContent) {
             const chatMessage = {
                 messageType: "TALK",
-                chatRoomId: "room1",
+                chatRoomId: roomName,
                 _content: messageContent
             };
             socket.send(JSON.stringify(chatMessage));
-            appendMessage("YOU: " + messageContent, true);
             messageInput.value = "";
         }
     }

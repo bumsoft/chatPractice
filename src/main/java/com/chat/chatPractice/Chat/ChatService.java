@@ -1,4 +1,4 @@
-package com.chat.chatPractice.chat;
+package com.chat.chatPractice.Chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;

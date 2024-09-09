@@ -1,4 +1,4 @@
-package com.chat.chatPractice.chat;
+package com.chat.chatPractice.Chat;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

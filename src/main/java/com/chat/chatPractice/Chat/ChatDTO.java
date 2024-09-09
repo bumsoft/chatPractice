@@ -1,4 +1,4 @@
-package com.chat.chatPractice.chat;
+package com.chat.chatPractice.Chat;
 
 import lombok.*;
 
