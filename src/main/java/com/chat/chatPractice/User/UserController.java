@@ -74,11 +74,4 @@ public class UserController {
         return "redirect:/";
     }
 
-    @PostMapping("startChat")
-    public String startChat(String room_name, Model model)
-    {
-        model.addAttribute("room_name",room_name);
-        log.info("{}방제",room_name);
-        return "chat";
-    }
 }

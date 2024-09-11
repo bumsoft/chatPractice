@@ -1,60 +1,47 @@
 package com.chat.chatPractice.Chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
+import com.chat.chatPractice.Chat.Entity.Chat;
+import com.chat.chatPractice.Chat.repository.ChatRepository;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
+
 
 @Service
 @Data
 @Slf4j
 public class ChatService {
 
-    private final ObjectMapper mapper;
-    private Map<String, ChatRoom> chatRooms;
+    private final ChatRepository chatRepository;
 
-    @PostConstruct
-    private void init()
+    public void sendChatToDB(ChatDTO chatDTO, String roomId)
     {
-        chatRooms = new LinkedHashMap<>();
-    }
-    public List<ChatRoom> findAllRoom()
-    {
-        return new ArrayList<>(chatRooms.values());
-    }
-
-    public ChatRoom findRoomById(String roomId)
-    {
-        return chatRooms.get(roomId);
-    }
-
-    public ChatRoom createRoom(String name)
-    {
-        //UUID로 roomId생성
-        String roomId = UUID.randomUUID().toString();
-
-        ChatRoom room = ChatRoom.builder()
-                .roomId(roomId)
-                .name(name)
+        Chat chat = Chat.builder()
+                .chatRoomId(roomId)
+                .senderId(chatDTO.getSenderId())
+                .content(chatDTO.get_content())
                 .build();
 
-        chatRooms.put(roomId, room);
-        return room;
+        chatRepository.save(chat);
     }
 
-    public <T> void sendMessage(WebSocketSession session, T message)
+    public List<Chat> getPrevChat(String roomId)
     {
-        try{
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(message)));
-        }catch(IOException e){
-            log.error(e.getMessage(),e);
+        return chatRepository.findByChatRoomId(roomId);
+    }
+
+    public String makeChatRoomId(String senderId, String receiverId)
+    {
+        if(senderId.compareTo(receiverId) > 0)
+        {
+            return senderId+ "+" +receiverId;
+        }
+        else
+        {
+            return receiverId+"+"+senderId;
         }
     }
-
 }

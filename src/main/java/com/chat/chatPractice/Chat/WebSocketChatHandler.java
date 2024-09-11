@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+//1:1 채팅만 구현할거임.
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
     // 채팅방 아이디가 String 키값이고, set은 {session1, session2}
     private final Map<String,Set<WebSocketSession>> chatRoomSessionMap = new HashMap<>();
 
+    private final ChatService chatService;
 
 
     // 소켓 연결 확인
@@ -48,11 +50,15 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
             // 페이로드 -> chatMessageDto로 변환
             ChatDTO chatDTO = mapper.readValue(payload, ChatDTO.class);
+
             chatDTO.setSenderId(session.getPrincipal().getName());
+
             log.info("payload {}", payload);
             log.info("session {}", chatDTO.toString());
 
-            String chatRoomId = chatDTO.getChatRoomId();
+            String chatRoomId = chatService.makeChatRoomId(chatDTO.getSenderId(),chatDTO.getReceiverId());
+
+
             // 메모리 상에 채팅방에 대한 세션 없으면 만들어줌
             if (!chatRoomSessionMap.containsKey(chatRoomId))
             {
@@ -70,14 +76,21 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
             {
                 // sessions 에 새로 들어온 session 을 담고,
                 chatRoomSession.add(session);
+                return;
             }
 
             //채팅방의 세션이 3개 이상이라면, 채팅방의 세션 집합에서, 전체세션 집합에 없는 것을 제거한다.
+        //지금은 필요x
             if (chatRoomSession.size() >= 3)
             {
                 removeClosedSession(chatRoomSession);
             }
+            //실시간 채팅
             sendMessageToChatRoom(chatDTO, chatRoomSession);
+
+            //db에 저장 ㄱ
+            // 뭘 저장하냐면... chatroomId하고, sender, content 정도만 저장해둘까?
+            chatService.sendChatToDB(chatDTO, chatRoomId);
     }
 
     @Override
@@ -94,6 +107,8 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
     private void sendMessageToChatRoom(ChatDTO chatDTO, Set<WebSocketSession> chatRoomSession)
     {
+        //단체방이 아니라 굳이 이렇게 할 필요 없긴해
+        //일단 이 코드는, 실시간으로, 채팅방에 있는 사람한테 메시지 보내줌.
         chatRoomSession.parallelStream()
                 .filter(sess -> !sess.getId().equals(chatDTO.getSenderId()))  // 본인(senderId)에게는 전송하지 않음
                 .forEach(sess -> sendMessage(sess, chatDTO));

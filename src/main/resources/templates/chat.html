@@ -69,16 +69,40 @@
 </head>
 <body>
 <div id="chatContainer">
-    <h2 id="roomNameElement" th:data-room-name="${room_name}">채팅방</h2>
-    <div id="chat"></div>
-    <input type="text" id="messageInput" placeholder="Enter message">
+    <h2 id="receiverId" th:data-receiverId="${receiverId}" th:text="${receiverId}">채팅방</h2>
+    <div id="chat">
+        <div th:each="chat : ${prevChat}">
+            <p>
+                <strong th:text="${chat.senderId}">Sender</strong>:
+                <span th:text="${chat.content}">Content</span>
+                <br>
+                <small th:text="${chat.time}">Time</small>
+            </p>
+        </div>
+
+
+    </div>
+
+
+    <input type="text" id="messageInput" placeholder="Enter message" onkeydown="handleKeyPress(event)">
     <button id="sendButton" onclick="sendMessage()">Send</button>
 </div>
 
+
+
+
 <script>
-    const roomName = document.getElementById('roomNameElement').getAttribute('data-room-name');
-    console.log("roomName: ", roomName); // roomName 값 확인
+    const receiverId = document.getElementById('receiverId').getAttribute('data-receiverId');
+    console.log("data-receiverId: ", receiverId); // roomName 값 확인
     const socket = new WebSocket('ws://localhost:8080/ws/chat');
+
+    // Enter 키가 눌렸을 때 메시지 전송
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();  // Enter 키가 눌리면 메시지 전송
+        }
+    }
+
 
     function appendMessage(message, isUser = false) {
         const chat = document.getElementById('chat');
@@ -93,7 +117,7 @@
         console.log("Connected to WebSocket");
         const enterMessage = {
             messageType: "ENTER",
-            chatRoomId: roomName,
+            receiverId: receiverId,
             _content: "님이 입장하셨습니다."
         };
         socket.send(JSON.stringify(enterMessage));
@@ -113,7 +137,7 @@
         if (messageContent) {
             const chatMessage = {
                 messageType: "TALK",
-                chatRoomId: roomName,
+                receiverId: receiverId,
                 _content: messageContent
             };
             socket.send(JSON.stringify(chatMessage));

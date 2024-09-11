@@ -14,8 +14,11 @@ public class ChatDTO {
     }
 
     private MessageType messageType;
-    private String chatRoomId;
+
     private String senderId;
+
+    private String receiverId;
+
     private String _content;
 
 }
