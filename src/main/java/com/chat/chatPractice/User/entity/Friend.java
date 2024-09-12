@@ -1,4 +1,4 @@
-package com.chat.chatPractice.User;
+package com.chat.chatPractice.User.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

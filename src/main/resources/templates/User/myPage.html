@@ -2,9 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: rgba(217, 246, 223, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #chatContainer {
+            margin-top: 100px;
+            width: 350px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        #friends, #chatRooms {
+            background-color: #e1f5fe;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #e1f5fe;
+
+            margin-bottom: 20px;
+        }
+
+        li {
+            list-style: none;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            display: block;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .temp:hover {
+            background-color: #f8f9fa;
+        }
+        .temp{
+            width: 90%;
+            height: 30px;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+        span:hover{
+
+        }
+        a {
+            display: inline;  /* a와 span을 inline 요소로 유지 */
+            white-space: nowrap;  /* 줄바꿈 방지 */
+        }
+    </style>
 </head>
 <body>
+<div id="chatContainer">
+<h2>친구목록</h2>
+<form th:action="@{/addFriend}" method="post">
+    <input type="text" name="username" placeholder="친구아이디로 친구추가"/>
+</form>
+<div id="friends"></div>
+<script>
+    $.ajax({
+        url: 'friends/all',
+        method: 'GET',
+        success: function (data) {
+            let friends = $('#friends');
 
+            data.forEach(friend => {
+                friends.append('<a href="/startChat/' + friend.username + '">' + friend.name +"("+friend.username +")"+ '</a><br><br>');
+            });
+        },
+        error: function (err) {
+            console.error('error fetching friends', err);
+        }
+    });
+</script>
+
+<h2>채팅</h2>
+<div id="chatRooms"></div>
+<script>
+    $.ajax({
+        url: 'chatRooms/all',
+        method: 'GET',
+        success: function (data) {
+            let chatRooms = $('#chatRooms');
+
+            data.forEach(chatRoom => {
+                chatRooms.append('<div class="temp"><a href="/startChat/' + chatRoom.username + '">' + chatRoom.name + "("+chatRoom.username + ")" + '</a><span style="font-size:10pt">'+chatRoom.content +'</span></div><br>' );
+            });
+        },
+        error: function (err) {
+            console.error('error fetching chatRooms', err);
+        }
+    });
+</script>
+</div>
 </body>
 </html>

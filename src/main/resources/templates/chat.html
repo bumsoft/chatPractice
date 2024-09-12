@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: rgba(217, 246, 223, 0.8);
             margin: 0;
         }
         #chatContainer {
@@ -69,11 +69,11 @@
 </head>
 <body>
 <div id="chatContainer">
-    <h2 id="receiverId" th:data-receiverId="${receiverId}" th:text="${receiverId}">채팅방</h2>
+    <h2 id="receiverId"  th:text="${receiverName} + '(' + ${receiverId} + ')'">채팅방</h2>
     <div id="chat">
         <div th:each="chat : ${prevChat}">
             <p>
-                <strong th:text="${chat.senderId}">Sender</strong>:
+                <span th:text="${chat.senderName}">Sender</span>:
                 <span th:text="${chat.content}">Content</span>
                 <br>
                 <small th:text="${chat.time}">Time</small>
@@ -91,9 +91,11 @@
 
 
 
-<script>
-    const receiverId = document.getElementById('receiverId').getAttribute('data-receiverId');
-    console.log("data-receiverId: ", receiverId); // roomName 값 확인
+<script th:inline="javascript">
+    const receiverId = /*[[${receiverId}]]*/ '?';
+    const receiverName = /*[[${receiverName}]]*/ '?';
+    const senderName = /*[[${senderName}]]*/ '?';
+
     const socket = new WebSocket('ws://localhost:8080/ws/chat');
 
     // Enter 키가 눌렸을 때 메시지 전송
@@ -126,9 +128,9 @@
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        const senderId = data.senderId;
+        const senderId = data.senderId; //빼버리기. data에서도 지워도 될듯
         const message = data._content;
-        appendMessage(senderId + ":" + message);
+        appendMessage(receiverName + ":" + message);
     };
 
     function sendMessage() {
@@ -141,6 +143,8 @@
                 _content: messageContent
             };
             socket.send(JSON.stringify(chatMessage));
+            appendMessage(senderName + ":" + messageContent);
+
             messageInput.value = "";
         }
     }

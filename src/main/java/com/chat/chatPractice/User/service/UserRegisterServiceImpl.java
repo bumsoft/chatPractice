@@ -1,5 +1,8 @@
-package com.chat.chatPractice.User;
+package com.chat.chatPractice.User.service;
 
+import com.chat.chatPractice.User.dto.UserRegisterDto;
+import com.chat.chatPractice.User.entity.User;
+import com.chat.chatPractice.User.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

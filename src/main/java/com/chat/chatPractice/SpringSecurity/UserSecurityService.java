@@ -1,7 +1,7 @@
 package com.chat.chatPractice.SpringSecurity;
 
-import com.chat.chatPractice.User.User;
-import com.chat.chatPractice.User.UserRepository;
+import com.chat.chatPractice.User.entity.User;
+import com.chat.chatPractice.User.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

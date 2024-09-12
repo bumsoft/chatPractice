@@ -1,5 +1,8 @@
-package com.chat.chatPractice.User;
+package com.chat.chatPractice.User.controller;
 
+import com.chat.chatPractice.User.dto.UserRegisterDto;
+import com.chat.chatPractice.User.service.UserRegisterService;
+import com.chat.chatPractice.User.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.security.Principal;
-
-import static org.hibernate.query.sqm.tree.SqmNode.log;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -71,7 +72,7 @@ public class UserController {
         log.info(username);
         userService.addFriend(principal.getName(),username);
 
-        return "redirect:/";
+        return "redirect:/myPage";
     }
 
 }

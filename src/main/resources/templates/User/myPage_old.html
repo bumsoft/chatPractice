@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <title>마이페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<h2>친구목록</h2>
+<form th:action="@{/addFriend}" method="post">
+    <input type="text" name="username" placeholder="친구아이디로 친구추가"/>
+</form>
+<div id="friends"></div>
+<script>
+    $.ajax({
+        url: 'friends/all',
+        method:'GET',
+        success: function(data){
+            let friends = $('#friends');
+
+            data.forEach(friend => {
+                friends.append('<li>' + friend + '</li>');
+            });
+        },
+        error: function(err){
+            console.error('error fetching friends',err);
+        }
+    });
+</script>
+
+<h2>채팅</h2>
+<div id="chatRooms"></div>
+<script>
+    $.ajax({
+        url: 'chatRooms/all',
+        method:'GET',
+        success: function(data){
+            let chatRooms = $('#chatRooms');
+
+            data.forEach(chatRoom => {
+                chatRooms.append('<a href="/startChat/' + chatRoom + '">' + chatRoom + '</a><br>');
+            });
+        },
+        error: function(err){
+            console.error('error fetching chatRooms',err);
+        }
+    });
+</script>
+
+</body>
+
+
+</html>

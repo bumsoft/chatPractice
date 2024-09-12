@@ -1,5 +1,6 @@
 package com.chat.chatPractice.Chat;
 
+import com.chat.chatPractice.Chat.Entity.ChatRoom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +57,8 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
             log.info("payload {}", payload);
             log.info("session {}", chatDTO.toString());
 
-            String chatRoomId = chatService.makeChatRoomId(chatDTO.getSenderId(),chatDTO.getReceiverId());
+            ChatRoom chatRoom = chatService.makeChatRoom(chatDTO.getSenderId(),chatDTO.getReceiverId());
+            String chatRoomId = chatRoom.getChatRoomId();
 
 
             // 메모리 상에 채팅방에 대한 세션 없으면 만들어줌
@@ -90,7 +92,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
             //db에 저장 ㄱ
             // 뭘 저장하냐면... chatroomId하고, sender, content 정도만 저장해둘까?
-            chatService.sendChatToDB(chatDTO, chatRoomId);
+            chatService.sendChatToDB(chatDTO, chatRoom);
     }
 
     @Override
@@ -107,10 +109,10 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
     private void sendMessageToChatRoom(ChatDTO chatDTO, Set<WebSocketSession> chatRoomSession)
     {
-        //단체방이 아니라 굳이 이렇게 할 필요 없긴해
+
         //일단 이 코드는, 실시간으로, 채팅방에 있는 사람한테 메시지 보내줌.
         chatRoomSession.parallelStream()
-                .filter(sess -> !sess.getId().equals(chatDTO.getSenderId()))  // 본인(senderId)에게는 전송하지 않음
+                .filter(sess -> !sess.getPrincipal().getName().equals(chatDTO.getSenderId()))  // 본인(senderId)에게는 전송하지 않음
                 .forEach(sess -> sendMessage(sess, chatDTO));
     }
 

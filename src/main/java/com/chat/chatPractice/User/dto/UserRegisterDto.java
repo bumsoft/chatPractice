@@ -1,4 +1,4 @@
-package com.chat.chatPractice.User;
+package com.chat.chatPractice.User.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;

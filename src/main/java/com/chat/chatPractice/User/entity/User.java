@@ -1,5 +1,6 @@
-package com.chat.chatPractice.User;
+package com.chat.chatPractice.User.entity;
 
+import com.chat.chatPractice.User.dto.UserRegisterDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

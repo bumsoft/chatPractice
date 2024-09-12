@@ -17,13 +17,15 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String chatRoomId;
+    @ManyToOne
+    @JoinColumn(name = "chatRoom_id")
+    private ChatRoom chatRoom;
 
     private String senderId;
 
     private String content;
 
     @CreatedDate
-    private String time;  // LocalDateTime으로 변경
+    private String time;
 }
 
