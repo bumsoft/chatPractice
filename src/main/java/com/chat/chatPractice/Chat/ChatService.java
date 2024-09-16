@@ -67,7 +67,7 @@ public class ChatService {
         return prevChatDtos;
 
     }
-
+//temp;
     public ChatRoom makeChatRoom(String senderId, String receiverId)
     {
         String roomId;
